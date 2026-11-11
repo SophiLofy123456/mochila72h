@@ -1,0 +1,33 @@
+MOCHILA 72H - PAQUETE PARA GENERAR EL APK
+=========================================
+
+Contenido: index.html (la app), manifest.webmanifest, sw.js (funciona sin internet),
+icons/ (iconos 192 y 512, normales y maskable).
+
+PASO 1. Subir la carpeta a internet con HTTPS (gratis, GitHub Pages)
+  1. Crea una cuenta en github.com y un repositorio publico, por ejemplo "mochila72h".
+  2. Sube TODO el contenido de esta carpeta a la raiz del repositorio (Add file > Upload files).
+  3. Settings > Pages > Source: "Deploy from a branch" > rama main, carpeta /(root) > Save.
+  4. En 1-2 minutos tendras un link tipo https://TU-USUARIO.github.io/mochila72h/
+  5. Abrelo en el celular: si carga la app, esta bien.
+
+PASO 2. Generar el APK
+  1. Entra a https://www.pwabuilder.com y pega tu link de GitHub Pages.
+  2. Pulsa "Start". Revisa que Manifest y Service Worker salgan en verde.
+  3. "Package for stores" > Android > "Generate Package".
+  4. Descarga el .zip: dentro viene el APK (para instalar directo) y el AAB (para Play Store).
+
+PASO 3. Instalar y compartir con QR
+  1. Pasa el .apk al celular e instalalo (Android pedira permitir "instalar apps de origen desconocido").
+  2. Para repartirlo por QR: sube el .apk a Google Drive, comparte con "cualquier persona con el enlace"
+     y genera un QR de ese enlace (por ejemplo en qr-code-generator.com o Canva).
+  3. Alternativa sin APK: genera el QR del link de GitHub Pages; en Chrome del celular,
+     menu > "Instalar app" y queda como app con icono.
+
+NOTAS
+  - Cuentas y datos se guardan en el celular donde se usa la app (no se sincronizan).
+  - Si PWABuilder te pide "Package ID", usa algo como pe.edu.ucsm.mochila72h
+  - La barra de direcciones del navegador puede verse dentro de la app hasta que se configure
+    el archivo assetlinks.json con la huella de firma que entrega PWABuilder (opcional, solo estetico).
+  - La conexion USB con el Arduino depende del navegador del celular; la prueba segura es en
+    Chrome o Edge de computadora abriendo el link de GitHub Pages.

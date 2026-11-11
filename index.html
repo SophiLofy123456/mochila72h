@@ -1,0 +1,696 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#2e5c47"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icons/icon-192.png"><link rel="apple-touch-icon" href="icons/icon-192.png"></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Mochila 72H</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=DM+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: auth screen, then app shell. Desktop = sidebar + content column; phone = content + bottom tab bar.
+   Look: forest green + soft sage ground, rounded organic shapes, one clay-orange signal color for alerts/SOS. */
+:root{
+  --bg:#eaeee7; --surface:#fbfcfa; --surface2:#e1e8df; --ink:#1b2a23; --muted:#5f6f66; --line:#d3dcd2;
+  --primary:#2e5c47; --primary-ink:#ffffff; --primary-soft:#d7e5dc;
+  --signal:#d4602a; --signal-ink:#ffffff;
+  --ok:#3c8758; --warn:#b98311; --bad:#c0432f; --none:#8a978f;
+  --rojo:#c9574a; --amarillo:#d8a42f; --azul:#4f84b5; --verde:#5a9a6a;
+  --serif:"Fraunces",Georgia,serif; --sans:"DM Sans",system-ui,-apple-system,sans-serif;
+  --r:22px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1713; --surface:#18231e; --surface2:#213029; --ink:#e8efe9; --muted:#9db0a5; --line:#2b3b33;
+    --primary:#7cc29f; --primary-ink:#0d1a13; --primary-soft:#22362c;
+    --signal:#ff8247; --signal-ink:#1a0e06;
+    --ok:#6cc58b; --warn:#e5b34f; --bad:#ff8a77; --none:#8a978f; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1713; --surface:#18231e; --surface2:#213029; --ink:#e8efe9; --muted:#9db0a5; --line:#2b3b33;
+  --primary:#7cc29f; --primary-ink:#0d1a13; --primary-soft:#22362c;
+  --signal:#ff8247; --signal-ink:#1a0e06;
+  --ok:#6cc58b; --warn:#e5b34f; --bad:#ff8a77; --none:#8a978f; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0;letter-spacing:-.01em;line-height:1.12}
+h2{font-size:1.75rem}
+h3{font-size:1.12rem}
+p{margin:0}
+.muted{color:var(--muted)}
+.note{font-size:.82rem;color:var(--muted)}
+a{color:var(--primary)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+
+/* shell */
+.shell{max-width:560px;margin:0 auto;padding-block:12px 100px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:1.3rem}
+.mark{width:34px;height:34px;border-radius:55% 45% 52% 48%;background:var(--primary);color:var(--primary-ink);display:grid;place-items:center;font-family:var(--sans);font-weight:700;font-size:.8rem}
+.who{display:flex;align-items:center;gap:8px}
+.chip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 12px 4px 4px;font-size:.85rem;font-weight:500}
+.chip b{width:26px;height:26px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-size:.8rem}
+.chip span{max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand{white-space:nowrap}
+@media (max-width:520px){
+  .chip{padding:3px}.chip span{display:none}
+  .brand{font-size:1.1rem}.who{gap:6px}
+  .btn.sos{padding:8px 14px}
+}
+.btn{border:1.5px solid var(--ink);background:transparent;padding:10px 18px;border-radius:99px;font-weight:600;cursor:pointer}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+.btn.signal{background:var(--signal);border-color:var(--signal);color:var(--signal-ink)}
+.btn.ghost{border-color:var(--line);background:var(--surface)}
+.btn.small{padding:6px 14px;font-size:.85rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sos{background:var(--signal);border-color:var(--signal);color:var(--signal-ink);letter-spacing:.08em;padding:8px 18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.74rem;font-weight:600;color:#fff;white-space:nowrap}
+.pill.ok{background:var(--ok)}.pill.warn{background:var(--warn)}.pill.bad{background:var(--bad)}.pill.none{background:var(--none)}
+.sec-title{font-size:.74rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:600;margin:20px 0 8px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;background:var(--primary);color:var(--primary-ink);border-radius:32px 32px 32px 90px;padding:22px 20px;margin-bottom:14px}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.09);pointer-events:none}
+.hero::before{width:190px;height:190px;right:-50px;top:-70px}
+.hero::after{width:120px;height:120px;right:50px;bottom:-60px}
+.hero .in{position:relative;display:flex;gap:16px;align-items:center}
+.hero h2{font-size:1.55rem}
+.hero p{opacity:.9;font-size:.92rem;margin-top:4px}
+.ring{width:96px;height:96px;flex:none;position:relative}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .v{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--serif);font-size:1.7rem;font-weight:600}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}
+.stat .n{font-family:var(--serif);font-size:1.7rem;font-weight:600;line-height:1}
+.stat .l{font-size:.76rem;color:var(--muted);margin-top:4px}
+.todo{display:flex;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.todo:last-child{border-bottom:0}
+.todo .dot{width:10px;height:10px;border-radius:50%;flex:none}
+.todo .dot.bad{background:var(--bad)}.todo .dot.warn{background:var(--warn)}.todo .dot.none{background:var(--none)}
+.todo span{flex:1;min-width:0}
+.allgood{display:flex;gap:10px;align-items:center;color:var(--ok);font-weight:600}
+
+/* forms */
+label.f{display:block;font-size:.76rem;color:var(--muted);font-weight:600;letter-spacing:.04em;margin:10px 0 4px}
+input[type=text],input[type=password],input[type=date],input[type=number],input[type=tel],textarea,select{
+  width:100%;padding:11px 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;min-width:0}
+input:focus,textarea:focus,select:focus{border-color:var(--primary);outline:none;box-shadow:0 0 0 3px var(--primary-soft)}
+textarea{min-height:64px;resize:vertical}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.chk:last-child{border-bottom:0}
+.chk input{width:20px;height:20px;margin-top:1px;accent-color:var(--primary);flex:none}
+.chk.done span{color:var(--muted);text-decoration:line-through}
+.seg{display:flex;background:var(--surface2);border-radius:99px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:transparent;padding:8px;border-radius:99px;font-weight:600;color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.switch{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.switch:last-child{border-bottom:0}
+
+/* module cards */
+.mod{position:relative;overflow:hidden}
+.mod::before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:var(--c)}
+.mod .tag{width:12px;height:12px;border-radius:50%;background:var(--c);flex:none}
+
+/* weights */
+.bar{height:16px;border-radius:99px;background:var(--surface2);overflow:hidden;display:flex}
+.bar b{display:block;height:100%}
+.limit{height:16px;border-radius:99px;background:var(--surface2);overflow:hidden}
+.limit b{display:block;height:100%;background:var(--ok);border-radius:99px}
+.limit.warn b{background:var(--warn)}.limit.bad b{background:var(--bad)}
+.sw{width:12px;height:12px;border-radius:4px;display:inline-block;flex:none}
+
+/* timer + steps */
+.timer{font-family:var(--serif);font-weight:500;font-size:4.4rem;text-align:center;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.timer.over{color:var(--bad)}
+.step{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.step:last-child{border-bottom:0}
+.step .k{width:30px;height:30px;border-radius:50%;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center;font-weight:700;flex:none}
+.step.done .k{background:var(--primary);color:var(--primary-ink)}
+.step.done b{color:var(--muted);text-decoration:line-through}
+.step b{display:block}
+.step span{color:var(--muted);font-size:.9rem}
+.hist{font-variant-numeric:tabular-nums;padding:4px 0}
+.del{border:0;background:transparent;color:var(--bad);font-weight:600;cursor:pointer;padding:4px 8px}
+.empty{text-align:center;color:var(--muted);padding:16px 8px}
+
+/* alarm */
+.status{display:flex;align-items:center;gap:12px}
+.led{width:14px;height:14px;border-radius:50%;background:var(--none);flex:none}
+.led.on{background:var(--ok);box-shadow:0 0 0 5px color-mix(in srgb,var(--ok) 25%,transparent)}
+.led.alarm{background:var(--bad);box-shadow:0 0 0 5px color-mix(in srgb,var(--bad) 25%,transparent)}
+.log{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.78rem;background:var(--bg);border-radius:14px;padding:10px 12px;max-height:170px;overflow:auto;line-height:1.6}
+pre.code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.76rem;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;overflow:auto;max-height:260px;margin:8px 0;line-height:1.45}
+.alert{border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--warn) 16%,var(--surface));border:1px solid color-mix(in srgb,var(--warn) 45%,var(--line));font-size:.9rem;margin-bottom:12px}
+.alert.bad{background:color-mix(in srgb,var(--bad) 14%,var(--surface));border-color:color-mix(in srgb,var(--bad) 45%,var(--line))}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;
+  padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px))}
+.nav-in{display:flex;width:100%;max-width:560px}
+.tab{flex:1;border:0;background:transparent;padding:6px 2px;border-radius:14px;font-size:.7rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-selected="true"]{color:var(--primary);background:var(--primary-soft)}
+@media (min-width:860px){
+  .shell{max-width:1000px;display:grid;grid-template-columns:220px minmax(0,1fr);column-gap:36px;padding-block:24px 40px;align-items:start}
+  .topbar{grid-column:1 / -1}
+  .nav{position:sticky;top:20px;left:auto;right:auto;bottom:auto;padding:8px;border:1px solid var(--line);border-radius:26px;display:block}
+  .nav-in{flex-direction:column;gap:2px;max-width:none}
+  .tab{flex-direction:row;font-size:.92rem;padding:11px 14px;gap:12px;justify-content:flex-start}
+  .main{min-width:0;max-width:640px}
+}
+
+/* auth */
+.auth{max-width:420px;margin:0 auto;padding-block:48px 40px;position:relative}
+.auth .blob{position:absolute;z-index:0;border-radius:58% 42% 50% 50%;background:var(--primary-soft);pointer-events:none}
+.auth .b1{width:230px;height:230px;right:-90px;top:10px}
+.auth .b2{width:150px;height:150px;left:-70px;bottom:20px;background:color-mix(in srgb,var(--signal) 18%,transparent)}
+.auth .in{position:relative;z-index:1}
+.auth h1{font-size:2.3rem;margin:18px 0 6px}
+.err{color:var(--bad);font-size:.88rem;margin-top:10px;min-height:1.2em}
+
+/* overlay */
+.overlay{position:fixed;inset:0;z-index:50;background:var(--bg);overflow:auto;
+  padding:max(18px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 28px max(16px,env(safe-area-inset-left,0px))}
+.overlay .wrap{max-width:560px;margin:0 auto}
+.overlay.light{background:#fff;color:#111}
+.overlay[hidden]{display:none!important}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;font-size:.88rem;z-index:60;max-width:90vw}
+@media (min-width:860px){.toast{bottom:28px}}
+@media (prefers-reduced-motion: no-preference){.ring circle.fg{transition:stroke-dashoffset .6s ease}}
+</style>
+
+<div id="root"></div>
+<div class="overlay" id="sos" hidden></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+/* ================= almacenamiento (por dispositivo) ================= */
+const mem={};
+const ls={
+  get(k){try{const v=localStorage.getItem(k);return v===null?(mem[k]??null):v}catch(e){return mem[k]??null}},
+  set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}},
+  del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}}
+};
+const $=s=>document.querySelector(s);
+const esc=t=>String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ================= cuentas (locales) ================= */
+const enc=new TextEncoder();
+function rnd(){try{return Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){return Math.random().toString(36).slice(2)+Date.now().toString(36)}}
+async function hashPw(pw,salt){
+  try{
+    const key=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode(salt),iterations:120000,hash:'SHA-256'},key,256);
+    return btoa(String.fromCharCode(...new Uint8Array(bits)));
+  }catch(e){let h=5381;for(const c of salt+pw){h=((h<<5)+h+c.charCodeAt(0))|0}return 'x'+h}
+}
+const getUsers=()=>{try{return JSON.parse(ls.get('m72:users')||'{}')}catch(e){return {}}};
+const putUsers=u=>ls.set('m72:users',JSON.stringify(u));
+
+/* ================= datos del producto (ficha técnica) ================= */
+const MODS0=[
+  {id:'rojo',name:'Salud',color:'--rojo',kg:0.9,items:['Botiquín básico','Analgésicos','Antidiarreicos','Compartimento con medicamentos de uso continuo (lo llena la familia)']},
+  {id:'amarillo',name:'Alimento',color:'--amarillo',kg:1.6,items:['12 raciones de alta densidad calórica (sin cocción ni agua)']},
+  {id:'azul',name:'Agua y abrigo',color:'--azul',kg:3.2,items:['2 L de agua de arranque','Filtro portátil','Pastillas potabilizadoras','2 envases plegables de 2 L','4 mantas térmicas de Mylar']},
+  {id:'verde',name:'Documentos',color:'--verde',kg:0.3,items:['Funda impermeable con copias de DNI, títulos, historias clínicas y pólizas','USB','Llaves de repuesto','Efectivo en billetes pequeños']}
+];
+const WEIGHTS=[['Mochila base vacía',1.2,'--none'],['Panel de refugio',1.2,'--signal'],['Módulos de color',6.0,'--azul'],['Energía y comunicación',0.8,'--amarillo'],['Módulo desprendible',2.5,'--verde']];
+const LIMIT=12;
+const REVIEW5=['Revisar las fechas del tarjetón de vigencia de cada módulo','Reponer medicamentos de uso continuo y botiquín','Probar radio dinamo, linterna frontal y silbatos','Verificar filtro, pastillas y envases de agua','Actualizar copias de documentos, efectivo y llaves','Pesar la mochila cargada (límite 12 kg)'];
+const ARMADO=[
+  ['Saca las varillas','Extráelas de los canales del panel posterior, sin herramientas.'],
+  ['Arma los dos parantes','Une los tres tramos de 55 cm de cada varilla con el manguito y el cordón elástico. Cada parante queda de 1.65 m.'],
+  ['Extiende el toldo','Despliega el toldo de 2 × 2 m en el piso.'],
+  ['Estaquea el borde posterior','Fija el borde de atrás con las estacas.'],
+  ['Levanta el frente','Coloca un parante en cada esquina delantera del toldo.'],
+  ['Tensa los vientos','Con el cordino de 4 mm, tensa desde las esquinas delanteras y estaquea.'],
+  ['Pon la esterilla de piso','Despliega el acordeón de 50 × 180 cm debajo. Cubre a 2–3 personas sentadas.']
+];
+const DOCS=['DNI (copias)','Títulos y certificados','Historias clínicas','Pólizas de seguro','USB con respaldos','Llaves de repuesto','Efectivo en billetes pequeños'];
+
+const SKETCH=`// Alarma Mochila 72H - Arduino UNO
+// Buzzer activo: + a D8, - a GND
+// Boton de panico: un pin a D2, el otro a GND
+const int BUZZER = 8;
+const int BOTON  = 2;
+bool alarma = false;
+bool tono = false;
+unsigned long t0 = 0;
+bool prev = HIGH;
+
+void setup() {
+  pinMode(BUZZER, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(BOTON, INPUT_PULLUP);
+  Serial.begin(9600);
+  Serial.println("LISTO");
+}
+
+void loop() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == 'A') { alarma = true;  Serial.println("ALARMA_ON"); }
+    if (c == 'S') {
+      alarma = false;
+      digitalWrite(BUZZER, LOW);
+      digitalWrite(LED_BUILTIN, LOW);
+      Serial.println("ALARMA_OFF");
+    }
+    if (c == 'T') {
+      digitalWrite(BUZZER, HIGH); delay(200);
+      digitalWrite(BUZZER, LOW);
+      Serial.println("TEST_OK");
+    }
+    if (c == 'P') Serial.println("PONG");
+  }
+  if (alarma && millis() - t0 >= 300) {
+    t0 = millis();
+    tono = !tono;
+    digitalWrite(BUZZER, tono);
+    digitalWrite(LED_BUILTIN, tono);
+  }
+  bool b = digitalRead(BOTON);
+  if (prev == HIGH && b == LOW) { Serial.println("BOTON"); delay(50); }
+  prev = b;
+}`;
+
+/* ================= estado ================= */
+let U=null,S=null;
+const defState=family=>({
+  family:family||'',
+  mods:Object.fromEntries(MODS0.map(m=>[m.id,{exp:'',packed:m.items.map(()=>false)}])),
+  review:{next:'',last:'',checks:REVIEW5.map(()=>false)},
+  members:[{name:'',age:'',role:'Portador A',notes:''},{name:'',age:'',role:'Portador B',notes:''},{name:'',age:'',role:'Sin carga',notes:''},{name:'',age:'',role:'Sin carga',notes:''}],
+  contacts:[{name:'',phone:''}],meet1:'',meet2:'',docs:DOCS.map(()=>false),
+  times:[],realKg:'',tab:'inicio',sub:'vigencia',
+  set:{autoAlarm:true,phoneSiren:true},alarmTested:false
+});
+const dkey=()=>'m72:data:'+U;
+function save(){if(U)ls.set(dkey(),JSON.stringify(S))}
+function loadUser(u,family){
+  U=u;
+  let d=null;try{d=JSON.parse(ls.get(dkey())||'null')}catch(e){}
+  const base=defState(family);
+  S=Object.assign(base,d||{});
+  S.set=Object.assign(base.set,(d&&d.set)||{});
+  ls.set('m72:session',u);
+}
+
+/* ================= utilidades ================= */
+const today0=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const daysTo=iso=>iso?Math.round((new Date(iso+'T00:00:00')-today0())/864e5):null;
+function status(iso){
+  const n=daysTo(iso);
+  if(n===null)return{k:'none',t:'Sin fecha',n};
+  if(n<0)return{k:'bad',t:'Vencido hace '+(-n)+' d',n};
+  if(n<=60)return{k:'warn',t:'Vence en '+n+' d',n};
+  return{k:'ok',t:'Vigente · '+n+' d',n};
+}
+const fmtDate=iso=>iso?new Date(iso+'T00:00:00').toLocaleDateString('es-PE',{day:'2-digit',month:'short',year:'numeric'}):'—';
+const mmss=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+let toastT=null;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2600)}
+
+/* ================= preparación (puntaje y pendientes) ================= */
+function readiness(){
+  let modScore=0;
+  MODS0.forEach(m=>{const k=status(S.mods[m.id].exp).k;modScore+=k==='ok'?1:k==='warn'?.5:0});
+  modScore=modScore/MODS0.length*35;
+  const all=MODS0.reduce((a,m)=>a+m.items.length,0),pk=MODS0.reduce((a,m)=>a+S.mods[m.id].packed.filter(Boolean).length,0);
+  const packScore=pk/all*20;
+  const docScore=S.docs.filter(Boolean).length/DOCS.length*15;
+  const rn=daysTo(S.review.next);
+  const revScore=(S.review.next&&rn>=0)?15:0;
+  const best=S.times.length?Math.min(...S.times.map(t=>t.ms)):null;
+  const armScore=best===null?0:best<=300000?15:7;
+  const pct=Math.round(modScore+packScore+docScore+revScore+armScore);
+  const todos=[];
+  MODS0.forEach(m=>{const s=status(S.mods[m.id].exp);
+    if(s.k==='bad')todos.push({k:'bad',t:`Repón el módulo ${m.name}: está vencido.`,go:['mochila','vigencia']});
+    else if(s.k==='warn')todos.push({k:'warn',t:`El módulo ${m.name} vence en ${s.n} días.`,go:['mochila','vigencia']});
+    else if(s.k==='none')todos.push({k:'none',t:`Registra la fecha de vencimiento del módulo ${m.name}.`,go:['mochila','vigencia']});
+  });
+  if(S.review.next&&rn<0)todos.push({k:'bad',t:`La revisión anual está atrasada ${-rn} días.`,go:['mochila','vigencia']});
+  if(!S.review.next)todos.push({k:'none',t:'Define la fecha de tu revisión anual.',go:['mochila','vigencia']});
+  if(pk<all)todos.push({k:'none',t:`Marca los ${all-pk} ítems que aún no empacaste.`,go:['mochila','vigencia']});
+  if(S.realKg==='')todos.push({k:'none',t:'Pesa la mochila cargada y registra el peso real.',go:['mochila','peso']});
+  else if(parseFloat(S.realKg)>LIMIT)todos.push({k:'bad',t:'La mochila pasa el límite de 12 kg.',go:['mochila','peso']});
+  if(!S.times.length)todos.push({k:'none',t:'Cronometra un armado del refugio (meta: 5 min).',go:['refugio']});
+  else if(best>300000)todos.push({k:'warn',t:'Tu mejor armado supera los 5 min. Practica de nuevo.',go:['refugio']});
+  if(!S.meet1)todos.push({k:'none',t:'Define el punto de reunión de la familia.',go:['familia']});
+  if(!S.contacts.some(c=>c.phone))todos.push({k:'none',t:'Agrega al menos un contacto de emergencia.',go:['familia']});
+  const nd=S.docs.filter(d=>!d).length;
+  if(nd)todos.push({k:'none',t:`Faltan ${nd} documentos por preparar.`,go:['familia']});
+  if(!S.alarmTested)todos.push({k:'none',t:'Prueba la alarma con el Arduino.',go:['alarma']});
+  const order={bad:0,warn:1,none:2};todos.sort((a,b)=>order[a.k]-order[b.k]);
+  return{pct,todos,best,pk,all};
+}
+
+/* ================= iconos y navegación ================= */
+const IC={
+  inicio:'<svg viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z"/></svg>',
+  mochila:'<svg viewBox="0 0 24 24"><path d="M8 7V6a4 4 0 0 1 8 0v1M6 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2zM8 14h8"/></svg>',
+  refugio:'<svg viewBox="0 0 24 24"><path d="M3 20 12 4l9 16zM12 4v16"/></svg>',
+  familia:'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M15 14.5c3 0 5.5 1.8 5.5 5"/></svg>',
+  alarma:'<svg viewBox="0 0 24 24"><path d="M6 17V11a6 6 0 0 1 12 0v6l1.5 2h-15zM10 21a2 2 0 0 0 4 0"/></svg>'
+};
+const TABS=[['inicio','Inicio'],['mochila','Mochila'],['refugio','Refugio'],['familia','Familia'],['alarma','Alarma']];
+
+/* ================= vistas ================= */
+function vInicio(){
+  const R=readiness();
+  const label=R.pct>=85?'Mochila lista':R.pct>=60?'Casi lista':'Falta preparar';
+  const sub=R.pct>=85?'Todo está en orden. Mantén la revisión anual.':R.pct>=60?'Resuelve los pendientes para dejarla lista.':'Empieza por los pendientes de abajo.';
+  const C=2*Math.PI*40,off=C*(1-R.pct/100);
+  const kg=parseFloat(S.realKg),plan=WEIGHTS.reduce((a,b)=>a+b[1],0);
+  const {todos}=R;
+  return `
+  <div class="hero"><div class="in">
+    <div class="ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="9"/><circle class="fg" cx="50" cy="50" r="40" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg><div class="v">${R.pct}%</div></div>
+    <div><h2>${label}</h2><p>${sub}</p></div></div></div>
+  <div class="stats">
+    <div class="stat"><div class="n">${R.pk}/${R.all}</div><div class="l">Ítems empacados</div></div>
+    <div class="stat"><div class="n">${R.best?mmss(R.best):'—'}</div><div class="l">Mejor armado · meta 05:00</div></div>
+    <div class="stat"><div class="n">${(isNaN(kg)?plan:kg).toFixed(1)} kg</div><div class="l">${isNaN(kg)?'Peso de diseño':'Peso medido'} · límite ${LIMIT}</div></div>
+    <div class="stat"><div class="n">${S.docs.filter(Boolean).length}/${DOCS.length}</div><div class="l">Documentos listos</div></div>
+  </div>
+  <div class="card"><div class="row between"><h3>Qué falta</h3><span class="note">${todos.length} pendientes</span></div>
+    ${todos.length?todos.slice(0,6).map((t,i)=>`<div class="todo"><i class="dot ${t.k}"></i><span>${esc(t.t)}</span><button class="btn small ghost" data-todo="${i}">Ver</button></div>`).join(''):'<div class="allgood" style="margin-top:10px">✓ No tienes pendientes.</div>'}
+  </div>
+  <div class="card"><h3>Cómo se usa</h3><p class="muted" style="margin-top:6px">Registra los vencimientos en <b>Mochila</b>, practica el armado en <b>Refugio</b>, completa el plan en <b>Familia</b> y prueba la <b>Alarma</b>. Al llegar a 85% la mochila se considera lista.</p></div>
+  <p class="note">Tus datos se guardan solo en este dispositivo.</p>`;
+}
+function vMochila(){
+  const seg=`<div class="seg" role="group" aria-label="Sección"><button aria-pressed="${S.sub==='vigencia'}" data-sub="vigencia">Vigencia</button><button aria-pressed="${S.sub==='peso'}" data-sub="peso">Peso</button></div>`;
+  return `<h2 style="margin-bottom:12px">Mochila</h2>`+seg+(S.sub==='peso'?vPeso():vVigencia());
+}
+function vVigencia(){
+  const mods=MODS0.map(m=>{
+    const st=S.mods[m.id],s=status(st.exp);
+    return `<div class="card mod" style="--c:var(${m.color})">
+      <div class="row between"><div class="row"><span class="tag"></span><h3>${m.name}</h3></div><span class="pill ${s.k}">${s.t}</span></div>
+      <label class="f" for="exp-${m.id}">Vence (fecha más próxima del módulo)</label>
+      <input type="date" id="exp-${m.id}" data-exp="${m.id}" value="${esc(st.exp)}">
+      <div style="margin-top:8px">${m.items.map((it,i)=>`<label class="chk ${st.packed[i]?'done':''}"><input type="checkbox" data-pk="${m.id}:${i}" ${st.packed[i]?'checked':''}><span>${esc(it)}</span></label>`).join('')}</div>
+      <p class="note" style="margin-top:6px">Peso del módulo: ${m.kg} kg</p></div>`}).join('');
+  const done=S.review.checks.filter(Boolean).length,rs=status(S.review.next);
+  return `${mods}
+  <div class="card"><div class="row between"><h3>Revisión anual · 5 minutos</h3>${S.review.next?`<span class="pill ${rs.k==='bad'?'bad':rs.k==='warn'?'warn':'ok'}">${rs.n<0?'Atrasada':'en '+rs.n+' d'}</span>`:''}</div>
+    <label class="f" for="nextrev">Fecha de la próxima revisión (por ejemplo, el simulacro nacional de sismo)</label>
+    <input type="date" id="nextrev" value="${esc(S.review.next)}">
+    <div style="margin-top:8px">${REVIEW5.map((t,i)=>`<label class="chk ${S.review.checks[i]?'done':''}"><input type="checkbox" data-rv="${i}" ${S.review.checks[i]?'checked':''}><span>${t}</span></label>`).join('')}</div>
+    <div class="row between" style="margin-top:12px"><span class="note">${done}/${REVIEW5.length}${S.review.last?' · última: '+fmtDate(S.review.last):''}</span>
+    <button class="btn primary small" id="finishRev" ${done<REVIEW5.length?'disabled':''}>Completar revisión</button></div></div>`;
+}
+function vPeso(){
+  const tot=WEIGHTS.reduce((a,b)=>a+b[1],0);
+  const kg=parseFloat(S.realKg),has=!isNaN(kg),cls=has?(kg>LIMIT?'bad':kg>LIMIT*.95?'warn':''):'';
+  return `<div class="card"><div class="row between"><h3>Peso de diseño</h3><b>${tot.toFixed(1)} kg</b></div>
+    <div class="bar" style="margin:12px 0">${WEIGHTS.map(w=>`<b style="width:${w[1]/tot*100}%;background:var(${w[2]})" title="${esc(w[0])}"></b>`).join('')}</div>
+    ${WEIGHTS.map(w=>`<div class="row between" style="padding:5px 0"><span class="row"><i class="sw" style="background:var(${w[2]})"></i>${w[0]}</span><b style="white-space:nowrap">${w[1].toFixed(1)} kg</b></div>`).join('')}
+    <p class="note" style="margin-top:8px">Cuerpo principal 9.2 kg + módulo desprendible 2.5 kg. Límite de diseño: ${LIMIT} kg. Son valores de partida; verifícalos con la mochila armada.</p></div>
+  <div class="card"><h3>Peso real medido</h3>
+    <label class="f" for="realkg">Mochila cargada (kg)</label><input type="number" step="0.1" id="realkg" value="${esc(S.realKg)}" inputmode="decimal" placeholder="Ej. 11.8">
+    ${has?`<div class="limit ${cls}" style="margin-top:12px"><b style="width:${Math.min(100,kg/LIMIT*100)}%"></b></div>
+    <p style="margin-top:10px">${kg>LIMIT?`<b>Pasa el límite por ${(kg-LIMIT).toFixed(1)} kg.</b> El recorte sale del módulo azul (agua de arranque), nunca del refugio ni del botiquín.`:`Dentro del límite. Margen: ${(LIMIT-kg).toFixed(1)} kg.`}</p>`:'<p class="note" style="margin-top:10px">Escribe el peso para compararlo con el límite.</p>'}</div>`;
+}
+let tInt=null,tStart=0,tRun=false,tElapsed=0,stepsDone=new Set();
+function vRefugio(){
+  const hist=S.times.slice().reverse().slice(0,8).map(t=>`<div class="row between hist"><span>${fmtDate(t.d)}</span><span><b>${mmss(t.ms)}</b> ${t.ms<=300000?'<span class="pill ok">en meta</span>':'<span class="pill warn">sobre 5 min</span>'}</span></div>`).join('');
+  return `<h2>Refugio</h2><p class="muted" style="margin:4px 0 14px">Meta: armarlo en menos de 5 minutos con las instrucciones a la vista. Protege del sol, el viento y la lluvia ligera; no es una carpa cerrada.</p>
+  <div class="card"><div class="timer" id="timer">00:00</div>
+    <div class="row" style="justify-content:center;margin-top:14px"><button class="btn primary" id="tGo">Iniciar</button><button class="btn ghost" id="tReset">Reiniciar</button></div>
+    <p class="note" style="text-align:center;margin-top:10px">Al detener, el tiempo se guarda en tu historial.</p></div>
+  <div class="card"><h3 style="margin-bottom:4px">Pasos</h3>${ARMADO.map((s,i)=>`<div class="step ${stepsDone.has(i)?'done':''}" data-step="${i}" role="checkbox" aria-checked="${stepsDone.has(i)}" tabindex="0"><div class="k">${i+1}</div><div><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join('')}</div>
+  <div class="card"><div class="row between"><h3>Historial</h3>${S.times.length?'<button class="del" id="clrT">Borrar</button>':''}</div>${hist||'<div class="empty">Todavía no registraste ningún armado.</div>'}</div>`;
+}
+function vFamilia(){
+  const mem=S.members.map((m,i)=>`<div class="card"><h3>Integrante ${i+1}</h3>
+    <div class="grid2"><div><label class="f" for="mn${i}">Nombre</label><input type="text" id="mn${i}" data-m="${i}:name" value="${esc(m.name)}"></div>
+    <div><label class="f" for="ma${i}">Edad</label><input type="number" id="ma${i}" data-m="${i}:age" value="${esc(m.age)}" inputmode="numeric"></div></div>
+    <label class="f" for="mr${i}">Qué carga</label>
+    <select id="mr${i}" data-m="${i}:role">${['Portador A','Portador B','Sin carga'].map(o=>`<option ${m.role===o?'selected':''}>${o}</option>`).join('')}</select>
+    <label class="f" for="mt${i}">Medicamentos, alergias o notas</label><textarea id="mt${i}" data-m="${i}:notes">${esc(m.notes)}</textarea></div>`).join('');
+  const con=S.contacts.map((c,i)=>`<div class="row" style="margin-bottom:8px"><input type="text" placeholder="Nombre" data-c="${i}:name" value="${esc(c.name)}" aria-label="Nombre del contacto"><input type="tel" placeholder="Teléfono" data-c="${i}:phone" value="${esc(c.phone)}" aria-label="Teléfono"><button class="del" data-dc="${i}" aria-label="Quitar contacto">✕</button></div>`).join('');
+  return `<h2>Familia</h2><p class="muted" style="margin:4px 0 14px">Lo que todos deben saber antes de que pase algo.</p>
+  <div class="card"><h3>Puntos de reunión</h3>
+    <label class="f" for="meet1">Principal</label><input type="text" id="meet1" value="${esc(S.meet1)}" placeholder="Ej. parque frente a la casa">
+    <label class="f" for="meet2">Alterno</label><input type="text" id="meet2" value="${esc(S.meet2)}" placeholder="Ej. plaza a 6 cuadras"></div>
+  <div class="card"><h3>Contactos de emergencia</h3><div style="margin-top:10px">${con}</div><button class="btn ghost small" id="addC">+ Agregar contacto</button></div>
+  <div class="card"><h3>Documentos listos</h3><p class="note" style="margin-bottom:4px">Van en la funda impermeable del módulo verde.</p>${DOCS.map((d,i)=>`<label class="chk ${S.docs[i]?'done':''}"><input type="checkbox" data-doc="${i}" ${S.docs[i]?'checked':''}><span>${d}</span></label>`).join('')}</div>
+  <p class="note" style="margin:0 2px 12px">Reparto de carga: el cuerpo principal pesa 9.2 kg y el módulo desprendible 2.5 kg. Un portador lleva cada parte.</p>${mem}`;
+}
+
+/* ================= Arduino (Web Serial) ================= */
+const A={connected:false,sim:false,alarm:false,port:null,writer:null,reader:null,closed:null,log:[],err:''};
+function addLog(t){
+  const d=new Date().toLocaleTimeString('es-PE',{hour12:false});
+  A.log.push(d+'  '+t);if(A.log.length>60)A.log.shift();
+  const el=$('#alog');if(el){el.innerHTML=A.log.map(esc).join('<br>');el.scrollTop=el.scrollHeight}
+}
+const serialOK=()=>'serial' in navigator;
+async function arduinoConnect(){
+  A.err='';
+  if(!serialOK()){A.err='Este navegador no permite USB serial. Usa Chrome o Edge en una computadora.';return render()}
+  try{
+    A.port=await navigator.serial.requestPort();
+    await A.port.open({baudRate:9600});
+    A.writer=A.port.writable.getWriter();
+    A.connected=true;A.sim=false;addLog('Conectado a 9600 baudios. El Arduino se reinicia al conectar…');
+    readLoop();
+    setTimeout(()=>send('P'),2200);
+    navigator.serial.addEventListener('disconnect',onUnplug,{once:true});
+  }catch(e){
+    A.err=(e&&e.name==='NotFoundError')?'No elegiste ningún puerto.':(e&&e.name==='SecurityError')?'Este visor bloquea el acceso USB. Abre el archivo de la app directamente en Chrome (computadora) para conectar el Arduino.':('No se pudo conectar: '+(e&&e.message||e));
+    A.port=null;
+  }
+  render();
+}
+async function readLoop(){
+  try{
+    const dec=new TextDecoderStream();
+    A.closed=A.port.readable.pipeTo(dec.writable).catch(()=>{});
+    A.reader=dec.readable.getReader();
+    let buf='';
+    while(true){
+      const {value,done}=await A.reader.read();if(done)break;
+      buf+=value;let i;
+      while((i=buf.indexOf('\n'))>=0){handleLine(buf.slice(0,i).trim());buf=buf.slice(i+1)}
+    }
+  }catch(e){}
+}
+function onUnplug(){addLog('Arduino desconectado.');A.connected=false;A.alarm=false;A.port=A.writer=A.reader=null;render()}
+async function arduinoDisconnect(){
+  try{A.reader&&await A.reader.cancel()}catch(e){}
+  try{A.writer&&A.writer.releaseLock()}catch(e){}
+  try{await A.closed}catch(e){}
+  try{A.port&&await A.port.close()}catch(e){}
+  A.connected=false;A.alarm=false;A.port=A.writer=A.reader=null;addLog('Desconectado.');render();
+}
+function handleLine(l){
+  if(!l)return;addLog('← '+l);
+  if(l==='ALARMA_ON'){A.alarm=true;render()}
+  else if(l==='ALARMA_OFF'){A.alarm=false;render()}
+  else if(l==='TEST_OK'||l==='PONG'){if(!S.alarmTested){S.alarmTested=true;save()}render()}
+  else if(l==='BOTON'){panic()}
+}
+async function send(c){
+  if(A.sim){addLog('→ '+c+' (simulado)');
+    const r={A:'ALARMA_ON',S:'ALARMA_OFF',T:'TEST_OK',P:'PONG'}[c];if(r)setTimeout(()=>handleLine(r),250);return true}
+  if(!A.connected||!A.writer)return false;
+  try{await A.writer.write(enc.encode(c));addLog('→ '+c);return true}catch(e){addLog('Error al enviar: '+e.message);return false}
+}
+/* sirena del celular */
+let actx=null,osc=null,sirenT=null;
+function stopSiren(){try{osc&&osc.stop()}catch(e){}osc=null;clearInterval(sirenT);sirenT=null}
+function startSiren(){
+  if(osc)return true;
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+    osc=actx.createOscillator();const g=actx.createGain();g.gain.value=.5;
+    osc.type='square';osc.connect(g);g.connect(actx.destination);osc.start();
+    let up=true;sirenT=setInterval(()=>{osc.frequency.setValueAtTime(up?1200:700,actx.currentTime);up=!up},450);return true
+  }catch(e){return false}
+}
+async function alarmOn(){
+  const sent=await send('A');
+  if(S.set.phoneSiren||!sent)startSiren();
+  return sent;
+}
+async function alarmOff(){await send('S');stopSiren()}
+function panic(){addLog('¡Botón de pánico presionado!');openSOS(true)}
+
+function vAlarma(){
+  const linked=A.connected||A.sim;
+  const led=A.alarm?'alarm':linked?'on':'';
+  const stxt=A.alarm?'Alarma sonando':A.connected?'Arduino conectado':A.sim?'Modo simulación':'Sin conectar';
+  return `<h2>Alarma</h2><p class="muted" style="margin:4px 0 14px">Conecta un Arduino UNO por USB para que la app haga sonar una alarma física.</p>
+  ${A.err?`<div class="alert bad">${esc(A.err)}</div>`:''}
+  ${!serialOK()?'<div class="alert">Este navegador no soporta USB serial. Puedes probar el flujo en modo simulación.</div>':''}
+  <div class="card"><div class="status"><i class="led ${led}"></i><div style="flex:1"><b>${stxt}</b><div class="note">${A.connected?'USB · 9600 baudios':'Arduino UNO · USB'}</div></div>
+    ${A.connected?'<button class="btn ghost small" id="aDis">Desconectar</button>':'<button class="btn primary small" id="aCon">Conectar</button>'}</div>
+    <div class="grid2" style="margin-top:14px">
+      <button class="btn ghost" id="aTest" ${linked?'':'disabled'}>Probar (pitido)</button>
+      ${A.alarm?'<button class="btn signal" id="aOff">Detener alarma</button>':'<button class="btn signal" id="aOn" '+(linked?'':'disabled')+'>Activar alarma</button>'}
+    </div></div>
+  <div class="card"><h3>Opciones</h3>
+    <label class="switch"><span>Sonar la alarma al abrir SOS<br><span class="note">Envía la orden al Arduino.</span></span><input type="checkbox" id="oAuto" ${S.set.autoAlarm?'checked':''}></label>
+    <label class="switch"><span>Sonar también en el celular<br><span class="note">Sirena por el parlante del dispositivo.</span></span><input type="checkbox" id="oPhone" ${S.set.phoneSiren?'checked':''}></label>
+    <label class="switch"><span>Modo simulación<br><span class="note">Prueba la app sin Arduino.</span></span><input type="checkbox" id="oSim" ${A.sim?'checked':''} ${A.connected?'disabled':''}></label></div>
+  <div class="card"><h3>Registro</h3><div class="log" id="alog" style="margin-top:8px">${A.log.length?A.log.map(esc).join('<br>'):'<span class="muted">Sin actividad.</span>'}</div></div>
+  <div class="card"><h3>Montaje</h3>
+    <p class="muted" style="margin:6px 0 4px">1. Buzzer activo: pata larga (+) a D8, pata corta (−) a GND.<br>2. Botón de pánico (opcional): un lado a D2, el otro a GND.<br>3. Carga este programa en el Arduino con el IDE y deja el cable USB conectado.<br>4. Abre esta app en Chrome o Edge de computadora y pulsa Conectar.</p>
+    <pre class="code" id="sketch">${esc(SKETCH)}</pre>
+    <button class="btn ghost small" id="copySk">Copiar código</button>
+    <p class="note" style="margin-top:10px">Comandos: A activa, S detiene, T pitido de prueba, P ping. El Arduino responde con una línea de texto y envía BOTON cuando se presiona el botón físico.</p></div>`;
+}
+
+/* ================= SOS ================= */
+function openSOS(fromButton){
+  const o=$('#sos');o.hidden=false;o.classList.remove('light');
+  const cons=S.contacts.filter(c=>c.name||c.phone).map(c=>`<div class="row between" style="padding:6px 0"><span>${esc(c.name||'Contacto')}</span><b><a href="tel:${esc(c.phone)}">${esc(c.phone)}</a></b></div>`).join('')||'<p class="muted">Agrega contactos en Familia.</p>';
+  o.innerHTML=`<div class="wrap"><div class="row between" style="margin-bottom:16px"><h2 style="color:var(--bad)">${fromButton?'Botón de pánico':'Emergencia'}</h2><button class="btn" id="sosX">Cerrar</button></div>
+  <div class="card"><h3>Punto de reunión</h3><p style="font-size:1.25rem;margin-top:6px"><b>${esc(S.meet1)||'Sin definir'}</b></p><p class="muted">Alterno: ${esc(S.meet2)||'Sin definir'}</p></div>
+  <div class="card"><h3>Contactos</h3>${cons}<p class="note">Si el enlace de llamada no abre, marca el número a mano.</p></div>
+  <div class="grid2"><button class="btn signal" id="sosAl">Activar alarma</button><button class="btn ghost" id="sosLight">Linterna de pantalla</button></div>
+  <div class="card" style="margin-top:14px"><h3>Primeras 72 horas</h3>
+    <p class="muted" style="margin-top:6px">Agua: unos 24 L para una familia de 4 en 72 h; usa el filtro y las pastillas. Abre la mochila a 180° sobre el suelo. Arma el refugio al llegar al punto de reunión. Radio dinamo en el bolsillo lateral. Un silbato por persona: tres toques cortos piden ayuda.</p></div></div>`;
+  $('#sosX').onclick=()=>{alarmOff();o.hidden=true};
+  $('#sosAl').onclick=async e=>{if(osc||A.alarm){await alarmOff();e.target.textContent='Activar alarma'}else{await alarmOn();e.target.textContent='Detener alarma'}};
+  $('#sosLight').onclick=()=>o.classList.toggle('light');
+  if(fromButton||S.set.autoAlarm){alarmOn().then(()=>{const b=$('#sosAl');if(b)b.textContent='Detener alarma'})}
+}
+
+/* ================= auth ================= */
+let authMode='login',authErr='',draft={family:'',user:''},busy=false;
+function renderAuth(){
+  $('#root').innerHTML=`<div class="auth"><i class="blob b1"></i><i class="blob b2"></i><div class="in">
+    <div class="brand"><span class="mark">72H</span>Mochila 72H</div>
+    <h1>${authMode==='login'?'Bienvenido de vuelta':'Crea tu cuenta familiar'}</h1>
+    <p class="muted">Controla la vigencia, el refugio y el plan de tu familia en un solo lugar.</p>
+    <div class="seg" style="margin-top:22px"><button aria-pressed="${authMode==='login'}" data-mode="login" type="button">Ingresar</button><button aria-pressed="${authMode==='register'}" data-mode="register" type="button">Crear cuenta</button></div>
+    <form id="authForm" class="card" autocomplete="on">
+      ${authMode==='register'?`<label class="f" for="afam">Nombre de la familia</label><input type="text" id="afam" value="${esc(draft.family)}" placeholder="Ej. Familia Chávez" required>`:''}
+      <label class="f" for="auser">Usuario</label><input type="text" id="auser" value="${esc(draft.user)}" autocomplete="username" autocapitalize="none" required>
+      <label class="f" for="apw">Contraseña</label><input type="password" id="apw" autocomplete="${authMode==='login'?'current-password':'new-password'}" ${authMode==='register'?'minlength="6"':''} required>
+      ${authMode==='register'?`<label class="f" for="apw2">Repite la contraseña</label><input type="password" id="apw2" autocomplete="new-password" required>`:''}
+      <div class="err" role="alert">${esc(authErr)}</div>
+      <button class="btn primary" style="width:100%;margin-top:6px" type="submit" ${busy?'disabled':''}>${busy?'Un momento…':authMode==='login'?'Ingresar':'Crear cuenta'}</button>
+    </form>
+    <p class="note">La cuenta se guarda solo en este dispositivo. Si borras los datos del navegador, se pierde.</p></div></div>`;
+}
+async function submitAuth(){
+  const user=($('#auser').value||'').trim().toLowerCase(),pw=$('#apw').value;
+  draft.user=user;authErr='';
+  if(authMode==='register'){
+    const fam=($('#afam').value||'').trim();draft.family=fam;
+    if(fam.length<2)authErr='Escribe el nombre de la familia.';
+    else if(!/^[a-z0-9._-]{3,20}$/.test(user))authErr='El usuario debe tener 3 a 20 letras, números, punto o guion.';
+    else if(pw.length<6)authErr='La contraseña debe tener al menos 6 caracteres.';
+    else if(pw!==$('#apw2').value)authErr='Las contraseñas no coinciden.';
+    else{
+      const users=getUsers();
+      if(users[user])authErr='Ese usuario ya existe en este dispositivo.';
+      else{busy=true;renderAuth();const salt=rnd();users[user]={family:fam,salt,hash:await hashPw(pw,salt)};putUsers(users);busy=false;loadUser(user,fam);save();return render()}
+    }
+  }else{
+    const users=getUsers(),u=users[user];
+    if(!u)authErr='No encontramos ese usuario en este dispositivo.';
+    else{busy=true;renderAuth();const h=await hashPw(pw,u.salt);busy=false;
+      if(h!==u.hash)authErr='Contraseña incorrecta.';
+      else{loadUser(user,u.family);return render()}}
+  }
+  busy=false;renderAuth();
+}
+
+/* ================= app ================= */
+function renderApp(){
+  const ini=(S.family||U||'?').trim().charAt(0).toUpperCase();
+  const view={inicio:vInicio,mochila:vMochila,refugio:vRefugio,familia:vFamilia,alarma:vAlarma}[S.tab]||vInicio;
+  $('#root').innerHTML=`<div class="shell">
+    <div class="topbar"><div class="brand"><span class="mark">72H</span>Mochila 72H</div>
+      <div class="who"><div class="chip" title="${esc(U)}"><b>${esc(ini)}</b><span>${esc(S.family||U)}</span></div><button class="btn small ghost" id="logout">Salir</button><button class="btn sos" id="sosBtn">SOS</button></div></div>
+    <nav class="nav" aria-label="Secciones"><div class="nav-in" role="tablist">${TABS.map(t=>`<button class="tab" role="tab" aria-selected="${S.tab===t[0]}" data-tab="${t[0]}">${IC[t[0]]}${t[1]}</button>`).join('')}</div></nav>
+    <main class="main">${view()}</main></div>`;
+  if(S.tab==='refugio')paintTimer();
+}
+function render(){U?renderApp():renderAuth()}
+function go(t,sub){S.tab=t;if(sub)S.sub=sub;save();render();window.scrollTo(0,0)}
+
+/* ================= cronómetro ================= */
+function paintTimer(){
+  const el=$('#timer');if(!el)return;
+  const ms=tRun?Date.now()-tStart:tElapsed;
+  el.textContent=mmss(ms);el.classList.toggle('over',ms>300000);
+  const b=$('#tGo');if(b)b.textContent=tRun?'Detener':'Iniciar';
+}
+function toggleTimer(){
+  if(!tRun){tElapsed=0;stepsDone=new Set();tStart=Date.now();tRun=true;tInt=setInterval(paintTimer,200);render()}
+  else{tElapsed=Date.now()-tStart;clearInterval(tInt);tRun=false;S.times.push({d:new Date().toISOString().slice(0,10),ms:tElapsed});save();render()}
+}
+
+/* ================= eventos ================= */
+document.addEventListener('submit',e=>{if(e.target.id==='authForm'){e.preventDefault();submitAuth()}});
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-mode],[data-tab],[data-sub],[data-todo],[data-step],#sosBtn,#logout,#tGo,#tReset,#clrT,#addC,[data-dc],#finishRev,#aCon,#aDis,#aTest,#aOn,#aOff,#copySk');
+  if(!t)return;
+  if(t.dataset.mode){authMode=t.dataset.mode;authErr='';return renderAuth()}
+  if(!U)return;
+  if(t.dataset.tab)return go(t.dataset.tab);
+  if(t.dataset.sub){S.sub=t.dataset.sub;save();return render()}
+  if(t.dataset.todo!==undefined){const g=readiness().todos[+t.dataset.todo].go;return go(g[0],g[1])}
+  if(t.dataset.step!==undefined){const i=+t.dataset.step;stepsDone.has(i)?stepsDone.delete(i):stepsDone.add(i);return render()}
+  switch(t.id){
+    case'sosBtn':return openSOS(false);
+    case'logout':stopSiren();ls.del('m72:session');U=null;S=null;authMode='login';authErr='';draft={family:'',user:''};return render();
+    case'tGo':return toggleTimer();
+    case'tReset':clearInterval(tInt);tRun=false;tElapsed=0;stepsDone=new Set();return render();
+    case'clrT':S.times=[];save();return render();
+    case'addC':S.contacts.push({name:'',phone:''});save();return render();
+    case'finishRev':{const d=new Date();S.review.last=d.toISOString().slice(0,10);const n=new Date(d);n.setFullYear(n.getFullYear()+1);S.review.next=n.toISOString().slice(0,10);S.review.checks=REVIEW5.map(()=>false);save();toast('Revisión registrada. Próxima: '+fmtDate(S.review.next));return render()}
+    case'aCon':return arduinoConnect();
+    case'aDis':return arduinoDisconnect();
+    case'aTest':await send('T');return;
+    case'aOn':await alarmOn();return;
+    case'aOff':await alarmOff();return;
+    case'copySk':try{await navigator.clipboard.writeText(SKETCH);toast('Código copiado')}catch(err){const r=document.createRange();r.selectNodeContents($('#sketch'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selecciona y copia (Ctrl+C)')}return;
+  }
+  if(t.dataset.dc!==undefined){S.contacts.splice(+t.dataset.dc,1);if(!S.contacts.length)S.contacts.push({name:'',phone:''});save();render()}
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.dataset&&e.target.dataset.step!==undefined){e.preventDefault();e.target.click()}});
+document.addEventListener('change',e=>{
+  if(!U)return;const el=e.target,d=el.dataset;
+  if(d.exp){S.mods[d.exp].exp=el.value}
+  else if(d.pk){const [id,i]=d.pk.split(':');S.mods[id].packed[+i]=el.checked}
+  else if(d.rv){S.review.checks[+d.rv]=el.checked}
+  else if(el.id==='nextrev'){S.review.next=el.value}
+  else if(d.doc){S.docs[+d.doc]=el.checked}
+  else if(d.m){const [i,k]=d.m.split(':');S.members[+i][k]=el.value;save();return}
+  else if(el.id==='realkg'){S.realKg=el.value}
+  else if(el.id==='oAuto'){S.set.autoAlarm=el.checked}
+  else if(el.id==='oPhone'){S.set.phoneSiren=el.checked}
+  else if(el.id==='oSim'){A.sim=el.checked;addLog(A.sim?'Modo simulación activado.':'Modo simulación desactivado.')}
+  else return;
+  save();render();
+});
+document.addEventListener('input',e=>{
+  if(!U)return;const el=e.target,d=el.dataset;
+  if(d.c){const [i,k]=d.c.split(':');S.contacts[+i][k]=el.value;save()}
+  else if(d.m){const [i,k]=d.m.split(':');S.members[+i][k]=el.value;save()}
+  else if(el.id==='meet1'){S.meet1=el.value;save()}
+  else if(el.id==='meet2'){S.meet2=el.value;save()}
+  else if(el.id==='realkg'){S.realKg=el.value;save()}
+});
+
+/* ================= arranque ================= */
+(function boot(){
+  const s=ls.get('m72:session'),users=getUsers();
+  if(s&&users[s])loadUser(s,users[s].family);
+  render();
+})();
+</script>
+
+<script>if("serviceWorker"in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}</script></body></html>
